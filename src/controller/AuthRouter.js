@@ -28,7 +28,8 @@ authRouter.post("/create",async (req, res) => {
     const hashedPassword = await bcrypt.hash(createRequest.password, salt);
     const user = new User({
       email: req.body.email,
-      password: hashedPassword
+      password: hashedPassword,
+      quotes: [],
     })
     await user.save();
     const userObject = user.toObject();

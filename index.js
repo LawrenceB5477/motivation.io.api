@@ -7,8 +7,10 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcrypt");
 const cors = require("cors");
+const {client, setTest, getTest} = require("./src/service/quoteCacheService");
 const User = require("./src/persistence/model/User");
 const authRouter = require("./src/controller/AuthRouter");
+const quoteRouter = require("./src/controller/QuoteRouter");
 const protectRoute = require("./src/controller/protectRoute");
 
 passport.use(new LocalStrategy({
@@ -36,7 +38,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = (await User.findById(id)).toObject();
+    const user = await User.findById(id);
     done(null, user);
   } catch (e) {
     console.log("Cannot deserialize user!");
@@ -48,6 +50,7 @@ const app = express();
 
 async function main() {
   await mongoose.connect(process.env.MONGODB_URL);
+  await client.connect();
 
   app.use(cors({
     origin: "http://localhost:8080",
@@ -68,17 +71,7 @@ async function main() {
   app.use(passport.initialize());
   app.use(passport.session());
   app.use("/auth", authRouter);
-
-  app.get("/count", protectRoute, (req, res) => {
-    console.log(req.user);
-    console.log(req.isAuthenticated());
-    req.session.count = req.session.count !== undefined ? req.session.count + 1 : 1;
-    return res.json(
-      {
-        count: req.session.count
-      }
-    );
-  });
+  app.use("/quote", quoteRouter);
 
   app.listen(process.env.PORT, () => {
     console.log(`Listening on port ${process.env.PORT}`);
