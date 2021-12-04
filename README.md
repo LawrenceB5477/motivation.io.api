@@ -8,6 +8,9 @@ Backend
 - clone the backend (https://github.com/LawrenceB5477/motivation.io.api)
 - Install dependencies (yarn install)
 - Create a .env file in the root directory of the project, copying and pasting its contents from the email provided (this contains passwords / private information so do not share!)
+- Save the motivation.json file somewhere on your computer and keep note of its absolute path, this is needed to authenticate 
+  with Google for sentiment analysis 
+- Set the GOOGLE_APPLICATION_CREDENTIALS variable in the .env file to the absolute path of the private key json file. 
 - Start the project (yarn start)
 
 Frontend
