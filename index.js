@@ -4,51 +4,16 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const passport = require("passport");
-const LocalStrategy = require("passport-local");
-const bcrypt = require("bcrypt");
 const cors = require("cors");
-const {client, setTest, getTest} = require("./src/service/quoteCacheService");
-const User = require("./src/persistence/model/User");
-const authRouter = require("./src/controller/AuthRouter");
-const quoteRouter = require("./src/controller/QuoteRouter");
-const protectRoute = require("./src/controller/protectRoute");
+const {client} = require("./src/service/quoteCacheService");
+const authRouter = require("./src/router/AuthRouter");
+const quoteRouter = require("./src/router/QuoteRouter")
+const userRouter = require("./src/router/UserRouter");
+require("./src/security/passportConfiguration");
 
-passport.use(new LocalStrategy({
-  usernameField: "email"
-}, async (email, password, done) => {
-  try {
-    const user = await User.findOne({email});
-    if (!user) {
-      return done(null, false, "User not found.");
-    }
-    if (!await bcrypt.compare(password, user.password)) {
-      return done(null, false, "Password invalid.");
-    }
-    done(null, user.toObject());
-  } catch (e) {
-    console.log("Login attempt failed!");
-    done(e);
-  }
-}));
-
-passport.serializeUser((user, done) => {
-  const userId = user._id.toString();
-  done(null, userId);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (e) {
-    console.log("Cannot deserialize user!");
-    done(e);
-  }
-})
-
-const app = express();
 
 async function main() {
+  const app = express();
   await mongoose.connect(process.env.MONGODB_URL);
   await client.connect();
 
@@ -72,6 +37,7 @@ async function main() {
   app.use(passport.session());
   app.use("/auth", authRouter);
   app.use("/quote", quoteRouter);
+  app.use("/user", userRouter);
 
   app.listen(process.env.PORT, () => {
     console.log(`Listening on port ${process.env.PORT}`);

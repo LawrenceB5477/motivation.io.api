@@ -1,5 +1,5 @@
 const quoteRouter = require("express").Router();
-const protectRoutes = require("./protectRoute");
+const protectRoutes = require("./util/protectRoute");
 const quoteService = require("../service/quoteService");
 const {StatusCodes} = require("http-status-codes");
 const User = require("../persistence/model/User");
